@@ -6,7 +6,24 @@ import { fileURLToPath } from 'url';
 import multer from 'multer';
 import * as dotenv from 'dotenv' // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
 import bodyParser from 'body-parser'
+import mongoose from 'mongoose';
+
 dotenv.config()
+
+async function main() {
+  await mongoose.connect(process.env.MONGO_CONNECT + 'customers');
+
+}
+
+main();
+
+const infoSchema = new mongoose.Schema({
+  name: String,
+  movie: String,
+  email:{ type: String, required: true } 
+})
+
+const Info = mongoose.model('Info', infoSchema);
 
 const jsonParser = bodyParser.json()
 
@@ -85,6 +102,31 @@ app.post('/api/overwrite', jsonParser, async (req, res) => {
   res.sendStatus(200);
 
 
+})
+
+//name
+//movie
+//email -req
+
+app.post('/api/addInfo', jsonParser, async (req, res) => {
+  // const client = new MongoClient(process.env.MONGO_CONNECT);
+  // await client.connect();
+
+  // const db = client.db('customers');
+
+  const custInfo = new Info( req.body );
+
+  try {
+  await custInfo.save()
+  }
+  catch (err) {
+    res.sendStatus(206)
+    return;
+  }
+  //const insertResult = client.db('customers').insertOne(req.body);
+  //console.log('Inserted documents =>', insertResult);
+
+  res.sendStatus(200);
 })
 
 app.post('/api/review', upload.single('movie_poster'),  async (req,res) => {
